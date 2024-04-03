@@ -77,7 +77,7 @@ def code_explanation():
     # Get list of available companies
     companies = ["AAPL", "MSFT", "GOOGL", "AMZN", "FB"]  # Add more symbols as needed
     
-    # Select company
+    # Select Company
     selected_company = "AAPL"  # Example selection, can be dynamic based on user input
     
     # Fetch stock data
