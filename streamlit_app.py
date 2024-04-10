@@ -2,6 +2,8 @@ import streamlit as st
 import yfinance as yf
 import numpy as np
 import matplotlib.pyplot as plt
+import datetime
+import base64
 
 # Set page title and icon
 st.set_page_config(page_title="Stock Price Simulation", page_icon=":chart_with_upwards_trend:")
@@ -18,8 +20,12 @@ def main():
     # Select company
     selected_company = st.selectbox("Select a company", companies)
 
+    # Choose starting date and duration
+    start_date = st.date_input("Starting Date", value=datetime.date(2020, 1, 1))
+    end_date = st.date_input("End Date", value=datetime.date(2023, 1, 1))
+
     # Fetch stock data
-    stock_data = yf.download(selected_company, start="2020-01-01", end="2023-01-01")  # Adjust date range as needed
+    stock_data = yf.download(selected_company, start=start_date, end=end_date)
 
     # Calculate daily returns
     stock_data['Daily_Returns'] = stock_data['Adj Close'].pct_change()
@@ -32,7 +38,7 @@ def main():
     num_simulations = st.slider("Number of Simulations", min_value=100, max_value=2000, value=1000, step=100)
 
     # Generate random normal values for each day in the simulation period
-    num_days = 252  # Assuming 252 trading days in a year
+    num_days = (end_date - start_date).days + 1
     rand_returns = np.random.normal(mu, sigma, (num_days, num_simulations))
 
     # Add 1 to the random returns to get daily growth factor
@@ -63,6 +69,7 @@ def main():
     st.write("Jayash Prem")
     st.write("Priya Sinha")
     st.write("Neha Bharti")
+
 # Code Explanation Page
 def code_explanation():
     st.title("Code Explanation")
@@ -80,8 +87,12 @@ def code_explanation():
     # Select Company
     selected_company = "AAPL"  # Example selection, can be dynamic based on user input
     
+    # Choose starting date and duration
+    start_date = "2020-01-01"  # Example starting date, can be dynamic based on user input
+    end_date = "2023-01-01"  # Example end date, can be dynamic based on user input
+    
     # Fetch stock data
-    stock_data = yf.download(selected_company, start="2020-01-01", end="2023-01-01")
+    stock_data = yf.download(selected_company, start=start_date, end=end_date)
     
     # Calculate daily returns
     stock_data['Daily_Returns'] = stock_data['Adj Close'].pct_change()
@@ -94,7 +105,7 @@ def code_explanation():
     num_simulations = 1000  # Example value, can be dynamic based on user input
     
     # Generate random normal values for each day in the simulation period
-    num_days = 252  # Assuming 252 trading days in a year
+    num_days = (end_date - start_date).days + 1
     rand_returns = np.random.normal(mu, sigma, (num_days, num_simulations))
     
     # Add 1 to the random returns to get daily growth factor
@@ -117,18 +128,27 @@ def code_explanation():
     ```
     """)
 
+# View .docx File Page
+def view_docx():
+    st.title("View .docx File")
+    with open("REPORT.docx", 'rb') as f:
+        docx_bytes = f.read()
+
+    # Show .docx contents
+    st.text("Content of .docx file:")
+    st.text(docx_bytes.decode('utf-8'))
+
 # Sidebar navigation
 pages = {
     "Stock Price Simulation": main,
-    "Code Explanation": code_explanation
+    "Code Explanation": code_explanation,
+    "View .docx File": view_docx
 }
 
 # Sidebar
 st.sidebar.title("Pages:")
 selection = st.sidebar.radio("Go to", list(pages.keys()))
-    
+
 # Display the selected page
-if selection == "Stock Price Simulation":
-    main()
-elif selection == "Code Explanation":
-    code_explanation()
+if selection in pages:
+    pages[selection]()
