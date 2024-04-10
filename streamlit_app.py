@@ -99,7 +99,7 @@ def main():
     ax.set_title(f'Monte Carlo Simulation of Stock Prices for {selected_company}')
     ax.set_xlabel('Days')
     ax.set_ylabel('Price')
-    ax.legend(loc='upper left')  # Adjust legend position
+    ax.legend(loc='upper right')  # Adjust legend position
 
     # Annotate plot with input details
     ax.text(0.02, 0.95, f"Selected Company: {selected_company}", transform=ax.transAxes, verticalalignment='top')
