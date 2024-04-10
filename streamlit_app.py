@@ -3,12 +3,53 @@ import yfinance as yf
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime
-import base64
 
 # Set page title and icon
 st.set_page_config(page_title="Stock Price Simulation", page_icon=":chart_with_upwards_trend:")
 
 # Main page - Stock Price Simulation
+@st.cache(allow_output_mutation=True)
+def simulate_stock_price(selected_company, start_date, end_date, num_simulations):
+    # Fetch stock data
+    stock_data = yf.download(selected_company, start=start_date, end=end_date)
+
+    # Calculate daily returns
+    stock_data['Daily_Returns'] = stock_data['Adj Close'].pct_change()
+
+    # Mean and standard deviation of daily returns
+    mu = stock_data['Daily_Returns'].mean()
+    sigma = stock_data['Daily_Returns'].std()
+
+    # Generate random normal values for each day in the simulation period
+    num_days = (end_date - start_date).days + 1
+    rand_returns = np.random.normal(mu, sigma, (num_days, num_simulations))
+
+    # Add 1 to the random returns to get daily growth factor
+    simulated_price_paths = np.cumprod(1 + rand_returns, axis=0) * stock_data.iloc[-1]['Adj Close']
+
+    return simulated_price_paths
+
+@st.cache
+def simulate_stock_price(selected_company, start_date, end_date, num_simulations):
+    # Fetch stock data
+    stock_data = yf.download(selected_company, start=start_date, end=end_date)
+
+    # Calculate daily returns
+    stock_data['Daily_Returns'] = stock_data['Adj Close'].pct_change()
+
+    # Mean and standard deviation of daily returns
+    mu = stock_data['Daily_Returns'].mean()
+    sigma = stock_data['Daily_Returns'].std()
+
+    # Generate random normal values for each day in the simulation period
+    num_days = (end_date - start_date).days + 1
+    rand_returns = np.random.normal(mu, sigma, (num_days, num_simulations))
+
+    # Add 1 to the random returns to get daily growth factor
+    simulated_price_paths = np.cumprod(1 + rand_returns, axis=0) * stock_data.iloc[-1]['Adj Close']
+
+    return simulated_price_paths
+
 def main():
     # Title and description
     st.title("Stock Price Simulation")
@@ -58,17 +99,29 @@ def main():
     ax.set_title(f'Monte Carlo Simulation of Stock Prices for {selected_company}')
     ax.set_xlabel('Days')
     ax.set_ylabel('Price')
-    ax.legend()
+    ax.legend(loc='upper left')  # Adjust legend position
+
+    # Annotate plot with input details
+    ax.text(0.02, 0.95, f"Selected Company: {selected_company}", transform=ax.transAxes, verticalalignment='top')
+    ax.text(0.02, 0.90, f"Start Date: {start_date}", transform=ax.transAxes, verticalalignment='top')
+    ax.text(0.02, 0.85, f"End Date: {end_date}", transform=ax.transAxes, verticalalignment='top')
+    ax.text(0.02, 0.80, f"Number of Simulations: {num_simulations}", transform=ax.transAxes, verticalalignment='top')
+
     st.pyplot(fig)
+
+    # Download option
+    st.markdown("---")
+    st.write("## Download Graph")
+    st.write("Click the button below to download the graph.")
+    if st.button("Download Graph"):
+        filename = f"{selected_company}:{start_date}to{end_date}_simulation.png"
+        plt.savefig(filename)
+        st.success(f"Graph saved as {filename}")
 
     # Footer
     st.markdown("---")
     st.write("Minor project by:")
-    st.write("Ankit Prakash")
-    st.write("Avanish Anand")
-    st.write("Jayash Prem")
-    st.write("Priya Sinha")
-    st.write("Neha Bharti")
+    st.write("Ankit Prakash, Avanish Anand, Jayash Prem, Priya Sinha, Neha Bharti")
 
 # Code Explanation Page
 def code_explanation():
@@ -129,20 +182,22 @@ def code_explanation():
     """)
 
 # View .docx File Page
+# View .docx File Page
 def view_docx():
-    st.title("View .docx File")
-    with open("REPORT.docx", 'rb') as f:
-        docx_bytes = f.read()
 
-    # Show .docx contents
-    st.text("Content of .docx file:")
-    st.text(docx_bytes.decode('utf-8'))
+    # Define the URL
+    external_url = "https://in.docworkspace.com/d/sILLDxN3eAbHl2bAG"
+
+    # Display a message with a clickable link
+    st.write("[PROJECT REPORT](" + external_url + ")")
+
+
 
 # Sidebar navigation
 pages = {
     "Stock Price Simulation": main,
     "Code Explanation": code_explanation,
-    "View .docx File": view_docx
+    "Links": view_docx,
 }
 
 # Sidebar
