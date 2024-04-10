@@ -1,5 +1,6 @@
 # step 1
-extract the zip
+clone the repository:
+git clone git@github.com:J01OG/RiskAssesmentMonteCarlo.git
 
 # step 2
 pip install -r requirment
